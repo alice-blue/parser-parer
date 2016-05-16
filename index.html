@@ -1,0 +1,375 @@
+<!DOCtype html>
+<html>
+<head>
+<!--
+Parser Parer by alice-blue can be found at
+https://github.com/alice-blue/parser-parer
+-->
+<title>Parser Parer: Generate Inform 7 code to limit the player's actions.</title>
+<script>
+"use strict";
+
+
+// Check all checkboxes in a given class.
+function selectAll(form,nameOfClass) {
+    var everyCheckbox = [],
+        n = 0;
+    var everyCheckbox = document.getElementsByClassName(nameOfClass);
+    for (n = 0; n < everyCheckbox.length;n++) {
+        everyCheckbox[n].checked = true
+    }
+}
+
+
+// Uncheck all checkboxes in a given class.
+function unselectAll(form,nameOfClass) {
+    var everyCheckbox = [],
+        n = 0;
+    var everyCheckbox = document.getElementsByClassName(nameOfClass);
+    for (n = 0; n < everyCheckbox.length; n++) {
+        everyCheckbox[n].checked = false;
+    }
+}
+
+
+// Remove hyphens (from hyphenated IDs) and replace with spaces.
+function removeHyphens(hyphenatedText) {
+    var dehyphenatedText = "";
+    var dehyphenatedText = hyphenatedText.replace(/-/g," ");
+    return dehyphenatedText;
+}
+
+
+// Generate "Understand nothing as (action)" code for each checked action.
+function generateUnderstandCode() {
+    var eachAction = {},
+        n = 0,
+        informCode = "";
+    var eachAction = document.getElementsByClassName("verb");
+    for (n = 0; n < eachAction.length; n++) {
+        if (eachAction[n].checked == true) {
+            var chosenAction = "",
+                chosenActionWithSpaces = "",
+                chosenActionLowerCase = "",
+                newCode = "";
+            // The hyphenated action name comes from the id attribute.
+            var chosenAction = eachAction[n].id;
+            var dehyphenatedChosenAction = removeHyphens(chosenAction);
+            // Change to lowercase since it'll be used within a sentence.
+            var chosenActionLowerCase = dehyphenatedChosenAction.toLowerCase();
+            var newCode = 
+                "Understand nothing as " + chosenActionLowerCase + ".<br>"
+            var informCode = informCode + newCode;
+        }
+    }
+    return informCode;
+}
+
+
+// Generate "(Action) is (kind of action)" code for each checked action.
+function generateKindCode() {
+    var eachAction = {},
+        kindName = "",
+        n = 0,
+        informCode = "";
+    var eachAction = document.getElementsByClassName("verb");
+    // Get kind name from input field.
+    var kindName = document.getElementById("kindText").value;
+    for (n = 0; n < eachAction.length; n++) {
+        if (eachAction[n].checked == true) {
+            var chosenAction = "",
+                dehyphenatedChosenAction = "",
+                chosenActionWithSomething = "",
+                newCode = "";
+            // The hyphenated action name comes from the id attribute.
+            var chosenAction = eachAction[n].id;
+            var dehyphenatedChosenAction = removeHyphens(chosenAction)
+            // Replace "it" with "something" so Inform will recognize it as an 
+            // action description.
+            var chosenActionWithSomething = 
+                dehyphenatedChosenAction.replace(/ it /," something "); 
+            var newCode = 
+                chosenActionWithSomething + " is " + kindName + ".<br>"
+            var informCode = informCode + newCode;
+        }
+    }
+    return informCode;
+}
+
+
+// Show the generated code in the code box
+function displayCode(informCode) {
+    if (informCode != "") {
+        document.getElementById("generated-code").innerHTML = informCode;
+    } else {
+    document.getElementById("generated-code").innerHTML = 
+        "[No actions are selected, so there is no code to generate.]";
+    }
+}
+    
+    
+// Compare the chosen actions against the list of questionable actions that 
+// require "Don't disable this" warnings, and make a list of the common entries.
+function findChosenQuestionableActions() {
+    var possibleQuestionableActions = [],
+        numberPossibleQuestionableActions = 0,
+        n = 0,
+        chosenQuestionableActions = [];
+    var possibleQuestionableActions = [
+        "Quitting-the-game",
+        "Saving-the-game",
+        "Restoring-the-game",
+        "Restarting-the-game",
+        "Requesting-the-story-file-version"
+    ];
+    var numberPossibleQuestionableActions = possibleQuestionableActions.length;
+    for (n = 0; n < numberPossibleQuestionableActions; n++) {
+        var possibleAction = "";
+        var possibleAction = possibleQuestionableActions[n];
+        if (document.getElementById(possibleAction).checked == true) {
+            // Add to list of chosen questionable actions.
+            chosenQuestionableActions.push(possibleAction);
+        }
+    }
+    return chosenQuestionableActions;
+}
+
+
+// If the user has chosen questionable actions, display a warning. If not, hide
+// any existing warning.
+function showOrHideQuestionableActionsWarning(chosenQuestionableActions) {
+    var numberChosenQuestionableActions = 0;
+    var numberChosenQuestionableActions = chosenQuestionableActions.length;
+    if (numberChosenQuestionableActions > 0) {
+        var i = 0,
+            textOfQuestionableActions= "",
+            sIfPlural = "",
+            EntireWarning = "";
+        for (i = 0; i < numberChosenQuestionableActions; i++) {
+            var questionableAction = "",
+                dehyphenatedAction = "",
+                bulletedAction = "";
+            var questionableAction = chosenQuestionableActions[i];
+            var dehyphenatedAction = removeHyphens(questionableAction);
+            var bulletedAction = "<br>* " + dehyphenatedAction;
+            var textOfQuestionableActions = 
+                textOfQuestionableActions + bulletedAction;
+        }
+        if (numberChosenQuestionableActions > 1) {
+            var sIfPlural = "s";
+        }
+        var entireWarning =
+            "[WARNING--Disabling the following action" + sIfPlural + 
+            " is not recommended:" + textOfQuestionableActions + "]<br>";
+        // Actually display the warning.
+        document.getElementById("questionable-actions-warning").innerHTML =
+            entireWarning
+    } else {
+        // Blank out the warning section if no questionable actions are chosen.
+        document.getElementById("questionable-actions-warning").innerHTML = "";
+    }
+}
+
+
+// Warn the user that old code will be erased next time.
+function showPreviousCodeWarning(form) {
+    document.getElementById("previous-code-warning").innerHTML = 
+        "Every time you GENERATE CODE, the new code will replace the old code in the box below.";
+}
+
+
+// The main routine: Decide which kind of code to generate and invoke other
+// functions as needed.
+function generateCode(form) {
+    var informCode = "",
+        chosenQuestionableActions = [];
+    if (document.getElementById("understand-radio-button").checked == true) {
+        var informCode = generateUnderstandCode(form);} 
+    else {
+        var informCode = generateKindCode(form);
+        }
+    displayCode(informCode);
+    var chosenQuestionableActions=findChosenQuestionableActions(form);
+    showOrHideQuestionableActionsWarning(chosenQuestionableActions);
+    showPreviousCodeWarning(form);
+}
+
+
+</script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="top-of-page" class="header-text"><br>Last updated: May 2016</div>
+<h1>Parser Parer</h1>
+<h2>Generate Inform 7 code to limit the player's actions.</h2>
+<noscript><hr>
+<br>
+<p class="warning" id="javascript-note">NOTE: You'll need to turn on JavaScript in your web browser in order for the code generator to work.</p>
+<br>
+<hr></noscript>
+<div class="important-item" id="choose-code-type">
+<h3>My code should...</h3>
+<p><input type=radio name="code-type" id="understand-radio-button" checked="checked" >not recognize the chosen actions. ("Understand nothing as" the action.)<br>
+<input type=radio name="code-type" id="kind-radio-button">assign a kind to the chosen actions. (The action "is <input type=text id="kindText" value="frivolous behavior">.")</p>
+</div>
+<form title = "Action Selection Form">
+<p>
+<button type=button class="medium-button" name="select-everything" onClick="selectAll(this.form,'verb')">Check all actions</button>
+<button type=button class="medium-button" name="unselect-everything" onClick="unselectAll(this.form,'verb')">Uncheck all actions</button>
+</p>
+<p>
+<a href="#end-of-form">Jump to the end of the form.</a>
+</p>
+<fieldset name = "possessions">
+<legend><b>Standard actions concerning the actor's possessions</b></legend>
+<input type=checkbox class="verb possessions" id="Taking-inventory">Taking inventory<BR>
+<input type=checkbox class="verb possessions" id="Taking">Taking<BR>
+<input type=checkbox class="verb possessions" id="Removing-it-from">Removing it from<BR>
+<input type=checkbox class="verb possessions" id="Dropping">Dropping<BR>
+<input type=checkbox class="verb possessions" id="Putting-it-on">Putting it on<BR>
+<input type=checkbox class="verb possessions" id="Inserting-it-into">Inserting it into<br>
+<input type=checkbox class="verb possessions" id="Eating">Eating<br>
+<br>
+<button type=button name="select-possessions" onClick="selectAll(this.form,'possessions')">Check group</button>
+<button type=button name="unselect-possessions" onClick="unselectAll(this.form,'possessions')">Uncheck group</button>
+</fieldset>
+<br>
+<fieldset name = "move">
+<legend><b>Standard actions which move the actor</b></legend>
+<input type=checkbox class="verb move" id="Going">Going<br>
+<input type=checkbox class="verb move" id="Entering">Entering<br>
+<input type=checkbox class="verb move" id="Exiting">Exiting<br>
+<input type=checkbox class="verb move" id="Getting-off">Getting off<br>
+<br>
+<button type=button name="select-move" onClick="selectAll(this.form,'move')">Check group</button>
+<button type=button name="unselect-move" onClick="unselectAll(this.form,'move')">Uncheck group</button>
+</fieldset>
+<br>
+<fieldset name = "vision">
+<legend><b>Standard actions concerning the actor's vision</b></legend>
+<input type=checkbox class="verb vision" id="Looking">Looking<br>
+<input type=checkbox class="verb vision" id="Examining">Examining<br>
+<input type=checkbox class="verb vision" id="Looking-under">Looking under<br>
+<input type=checkbox class="verb vision" id="Searching">Searching<br>
+<input type=checkbox class="verb vision" id="Consulting-it-about">Consulting it about<br>
+<br>
+<button type=button name="select-vision" onClick="selectAll(this.form,'vision')">Check group</button>
+<button type=button name="unselect-vision" onClick="unselectAll(this.form,'vision')">Uncheck group</button><br>
+</fieldset>
+<br>
+<fieldset name = "state">
+<legend><b>Standard actions which change the state of things</b></legend>
+<input type=checkbox class="verb state" id="Locking-it-with">Locking it with<br>
+<input type=checkbox class="verb state" id="Unlocking-it-with">Unlocking it with<br>
+<input type=checkbox class="verb state" id="Switching-on">Switching on<br>
+<input type=checkbox class="verb state" id="Switching-off">Switching off<br>
+<input type=checkbox class="verb state" id="Opening">Opening<br>
+<input type=checkbox class="verb state" id="Closing">Closing<br>
+<input type=checkbox class="verb state" id="Wearing">Wearing<br>
+<input type=checkbox class="verb state" id="Taking-off">Taking off<br>
+<br>
+<button type=button name="select-state" onClick="selectAll(this.form,'state')">Check group</button>
+<button type=button name="unselect-state" onClick="unselectAll(this.form,'state')">Uncheck group</button><br>
+</fieldset>
+<br>
+<fieldset name = "people">
+<legend><b>Standard actions concerning other people</b></legend>
+<input type=checkbox class="verb people" id="Giving-it-to">Giving it to<br>
+<input type=checkbox class="verb people" id="Showing-it-to">Showing it to<br>
+<input type=checkbox class="verb people" id="Waking">Waking<br>
+<input type=checkbox class="verb people" id="Throwing-it-at">Throwing it at<br>
+<input type=checkbox class="verb people" id="Attacking">Attacking<br>
+<input type=checkbox class="verb people" id="Kissing">Kissing<br>
+<input type=checkbox class="verb people" id="Answering-it-that">Answering it that<br>
+<input type=checkbox class="verb people" id="Telling-it-about">Telling it about <br>
+<input type=checkbox class="verb people" id="Asking-it-about">Asking it about<br>
+<input type=checkbox class="verb people" id="Asking-it-for">Asking it for<br>
+<br>
+<button type=button name="select-people" onClick="selectAll(this.form,'people')">Check group</button>
+<button type=button name="unselect-people" onClick="unselectAll(this.form,'people')">Uncheck group</button><br>
+</fieldset>
+<br>
+<fieldset name = "checked">
+<legend><b>Standard actions which are checked but then do nothing unless rules intervene</b></legend>
+<input type=checkbox class="verb checked" id="Waiting">Waiting<br>
+<input type=checkbox class="verb checked" id="Touching">Touching<br>
+<input type=checkbox class="verb checked" id="Waving">Waving<br>
+<input type=checkbox class="verb checked" id="Pulling">Pulling<br>
+<input type=checkbox class="verb checked" id="Pushing">Pushing<br>
+<input type=checkbox class="verb checked" id="Turning">Turning<br>
+<input type=checkbox class="verb checked" id="Pushing-it-to">Pushing it to<br>
+<input type=checkbox class="verb checked" id="Squeezing">Squeezing<br>
+<br>
+<button type=button name="select-checked" onClick="selectAll(this.form,'checked')">Check group</button>
+<button type=button name="unselect-checked" onClick="unselectAll(this.form,'checked')">Uncheck group</button><br>
+</fieldset>
+<br>
+<fieldset name = "nothing">
+<legend><b>Standard actions which always do nothing unless rules intervene</b></legend>
+<input type=checkbox class="verb nothing" id="Saying-yes">Saying yes<br>
+<input type=checkbox class="verb nothing" id="Saying-no">Saying no <br>
+<input type=checkbox class="verb nothing" id="Burning">Burning<br>
+<input type=checkbox class="verb nothing" id="Waking-up">Waking up<br>
+<input type=checkbox class="verb nothing" id="Thinking">Thinking<br>
+<input type=checkbox class="verb nothing" id="Smelling">Smelling<br>
+<input type=checkbox class="verb nothing" id="Listening-to">Listening to<br>
+<input type=checkbox class="verb nothing" id="Tasting">Tasting<br>
+<input type=checkbox class="verb nothing" id="Cutting">Cutting<br>
+<input type=checkbox class="verb nothing" id="Jumping">Jumping<br>
+<input type=checkbox class="verb nothing" id="Tying-it-to">Tying it to<br>
+<input type=checkbox class="verb nothing" id="Drinking">Drinking<br>
+<input type=checkbox class="verb nothing" id="Saying-sorry">Saying sorry<br>
+<input type=checkbox class="verb nothing" id="Swinging">Swinging<br>
+<input type=checkbox class="verb nothing" id="Rubbing">Rubbing<br>
+<input type=checkbox class="verb nothing" id="Setting-it-to">Setting it to<br>
+<input type=checkbox class="verb nothing" id="Waving-hands">Waving hands<br>
+<input type=checkbox class="verb nothing" id="Buying">Buying<br>
+<input type=checkbox class="verb nothing" id="Climbing">Climbing<br>
+<input type=checkbox class="verb nothing" id="Sleeping">Sleeping<br>
+<br>
+<button type=button name="select-nothing" onClick="selectAll(this.form,'nothing')">Check group</button>
+<button type=button name="unselect-nothing" onClick="unselectAll(this.form,'nothing')">Uncheck group</button><br>
+</fieldset>
+<br>
+<fieldset name = "meta">
+<legend><b>Standard actions which happen out of world</b></legend>
+<input type=checkbox class="verb meta" id="Quitting-the-game"><span style="color: #f42a07;
+    font-weight: bold;">Quitting the game*</span><br>
+<input type=checkbox class="verb meta" id="Saving-the-game"><span style="color: #f42a07;
+    font-weight: bold;">Saving the game*</span><br>
+<input type=checkbox class="verb meta" id="Restoring-the-game"><span style="color: #f42a07;
+    font-weight: bold;">Restoring the game*</span><br>
+<input type=checkbox class="verb meta" id="Restarting-the-game"><span style="color: #f42a07;
+    font-weight: bold;">Restarting the game*</span><br>
+<input type=checkbox class="verb meta" id="Verifying-the-story-file">Verifying the story file<br>
+<input type=checkbox class="verb meta" id="Switching-the-story-transcript-on">Switching the story transcript on<br>
+<input type=checkbox class="verb meta" id="Switching-the-story-transcript-off">Switching the story transcript off<br>
+<input type=checkbox class="verb meta" id="Requesting-the-story-file-version"><span style="color: #f42a07;
+    font-weight: bold;">Requesting the story file version*</span><br>
+<input type=checkbox class="verb meta" id="Requesting-the-score">Requesting the score<br>
+<input type=checkbox class="verb meta" id="Preferring-abbreviated-room-descriptions">Preferring abbreviated room descriptions<br>
+<input type=checkbox class="verb meta" id="Preferring-unabbreviated-room-descriptions">Preferring unabbreviated room descriptions<br>
+<input type=checkbox class="verb meta" id="Preferring-sometimes-abbreviated-room-descriptions">Preferring sometimes abbreviated room descriptions<br>
+<input type=checkbox class="verb meta" id="Switching-score-notification-on">Switching score notification on<br>
+<input type=checkbox class="verb meta" id="Switching-score-notification-off">Switching score notification off<br>
+<input type=checkbox class="verb meta" id="Requesting-the-pronoun-meanings">Requesting the pronoun meanings<br>
+<br>
+<button type=button name="select-meta" onClick="selectAll(this.form,'meta')">Check group</button>
+<button type=button name="unselect-meta" onClick="unselectAll(this.form,'meta')">Uncheck group</button><br>
+<hr>
+<span style="color: #f42a07; font-weight: bold;">*Disabling these actions may upset players. Disabling "requesting the story file version" may also violate Inform's license requirements.</span>
+</fieldset>
+<p><a href="#top-of-page" id="end-of-form">Jump to the top of the page.</a></p>
+<button type=button name="generate" class="large-button" onClick="generateCode(this.form)">GENERATE CODE</button><p>
+<p id="previous-code-warning"></p>
+</form>
+<div class="code-box">
+<p id="questionable-actions-warning" class="warning"></p>
+<p id="generated-code"></p>
+</div>
+<br>
+<hr>
+<div class="footer-text">The actions in the form above, as well as their category names, are quoted directly from the <a href="http://inform7.com/">Inform 7 IDE</a>. Inform was written by Graham Nelson, "with help from Emily Short and many others."</div>
+<br><br>
+</body>
+</html>
