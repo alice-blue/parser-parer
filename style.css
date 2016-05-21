@@ -1,8 +1,16 @@
+/*
+Parser Parer can be found at http://alice-blue.github.io/parser-parer/
+*/
+
 body
 {
 	max-width: 800px;
 	margin-left: auto;
 	margin-right: auto;
+	padding-top: 0.35em;
+	padding-bottom: 0.625em;
+	padding-left: 0.75em;
+	padding-right: 0.75em;
 	font-family: Tahoma, Geneva, sans-serif;
 	font-size: 18px;
 	line-height: 1.5;
@@ -11,21 +19,26 @@ body
 div.header-text
 {
 	font-size: 16px;
-	text-align: right;
+	float: right;
 }
 
-div.important-item
+/* Box for choosing which kind of code to generate */
+div.important-box
 {
-    background-color: #f3e0b9;
+	background-color: #f3e0b9;
 	border-radius: 10px;
-	padding-left: 3%;
-	padding-right: 3%;
-	padding-top: 1%;
-	padding-bottom: 1%;
-	font-size: 22px;
+	margin-top: 14px;
+	margin-bottom: 14px;
+	margin-left: 2px;
+	margin-right: 2px;
+	padding-left: 40px;
+	padding-right: 40px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	font-size: 20px
 }
 
-button
+button.small-button
 {
 	background-color: #4c3019;
 	color: #ffffff;
@@ -34,39 +47,121 @@ button
 	border-radius: 4px;
 	font-size: 18px;
 	font-weight: bold;
+	margin-left: 2px;
+	margin-right: 2px;
 	padding: 6px;
-	
-	
 }
 
 button.medium-button
 {
-    font-size: 20px;
+	background-color: #4c3019;
+	color: #ffffff;
+	box-shadow: none;
+	border: none;
+	border-radius: 4px;
+	font-size: 20px;
+	font-weight: bold;
+	margin-left: 2px;
+	margin-right: 6px;
 	padding: 10px;
 }   
 
 button.large-button
 {
-	font-size: 32px;
-	padding: 18px;
+	background-color: #4c3019;
+	color: #ffffff;
+	box-shadow: none;
+	border: none;
+	border-radius: 4px;
+	font-size: 24px;
+	font-weight: bold;
+	margin-left: 2px;
+    margin-right: 12px;
+	padding-top: 12px;
+	padding-bottom: 12px;
+	padding-left: 24px;
+	padding-right: 24px;
 }
 
-div.code-box
+button.accordion
 {
-	height: 400px;
+    background-color: #ffffff;
+	margin-left: 6px;
+	margin-right: 6px;
+	width: calc(100% - 2em);
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 20px;
+	font-family: Tahoma, Geneva, sans-serif;
+	line-height: 1.5;
+	transition: 0.2s;
+}
+
+button.accordion:hover
+{
+     background-color: #fcefca;
+}
+
+/* Plus sign */
+button.accordion:after
+{
+	content: '\02795';
+	font-size: 16px;
+	color: #b58f5e;
+	color: #876B46;
+	float: right;
+}
+
+/* Minus sign */
+button.accordion.active:after
+{
+	content: "\2796";
+}
+
+/* Div for the commands that show when the accordion is open */
+div.panel
+{
+	padding-left: 1em;
+	padding-right: 1em;
+	max-height: 0;
+	max-width: 100%;
+	overflow: hidden;
+	transition: 0.3s ease-in-out;
+	opacity: 0;
+	font-family: sans-serif;
+	font-size: 18px;
+	line-height: 1.5;
+}
+
+div.panel.show
+{
+	opacity: 1;
+	max-height: 500px;  
+}
+
+textarea.code-box
+{
+	width: 100%;
+	max-width: 800px;
+	height: 325px;
 	overflow-x: auto;
 	overflow-y: scroll;
-	border-style: inset;
-	background-color: #ffffff;
-	padding-left: 18px;
-	padding-right: 18px;
-}	
+	box-sizing: border-box;
+	border: 3px inset #ccc;
+	background-color: #f8f8f8;
+	margin-left: 2px;
+	margin-right: 2px;
+	padding: 1em;
+	resize: none;
+	font-size: 20px;
+}
 
 p.warning
 {   
 	color: #f42a07;
 	font-weight: bold;
-}	
+}
 
 div.footer-text
 {
