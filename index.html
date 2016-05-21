@@ -6,6 +6,7 @@ Parser Parer by alice-blue can be found at
 https://github.com/alice-blue/parser-parer
 -->
 <title>Parser Parer: Generate Inform 7 code to limit the player's actions.</title>
+
 <script>
 "use strict";
 
@@ -70,27 +71,27 @@ function findChosenQuestionableActions() {
 // Create a "Don't disable this" warning for any questionable actions.
 function createQuestionableWarning(chosenQuestionableActions) {
     var numberChosenQuestionableActions = 0,
-        questionableWarning = "";
+		questionableWarning = "";
     var numberChosenQuestionableActions = chosenQuestionableActions.length;
     if (numberChosenQuestionableActions > 0) {
         var sIfPlural = "",
-            i = 0,
-            listItems = "";
-        if (numberChosenQuestionableActions > 1) {
+			i = 0,
+			listItems = "";
+		if (numberChosenQuestionableActions > 1) {
             var sIfPlural = "s";
-        }
-        for (i = 0; i < numberChosenQuestionableActions; i++) {
-            var questionableAction = "",
-                dehyphenatedAction = "",
-                listItem = "";
-            var questionableAction = chosenQuestionableActions[i];
-            var dehyphenatedAction = removeHyphens(questionableAction);
-            var listItem = "\n* " + dehyphenatedAction;
-            var listItems = listItems + listItem;
-        }
-        var questionableWarning = "[WARNING--Disabling the following action" + sIfPlural + " is not recommended:" + listItems + "]\n\n";
-        }
-    return questionableWarning;
+		}
+		for (i = 0; i < numberChosenQuestionableActions; i++) {
+			var questionableAction = "",
+				dehyphenatedAction = "",
+				listItem = "";
+			var questionableAction = chosenQuestionableActions[i];
+			var dehyphenatedAction = removeHyphens(questionableAction);
+			var listItem = "\n* " + dehyphenatedAction;
+			var listItems = listItems + listItem;
+		}
+		var questionableWarning = "[WARNING--Disabling the following action" + sIfPlural + " is not recommended:" + listItems + "]\n\n";
+		}
+	return questionableWarning;
 }
  
 
@@ -153,35 +154,35 @@ function generateKindCode() {
 
 // Show the warning + generated code in the code box
 function displayCode(questionableWarning, informCode) {
-    var codeBoxContents = "";
-    if (questionableWarning == "") {
-        var codeBoxContents = informCode;
-    } else {
-        var codeBoxContents = questionableWarning + informCode;
-    }
-    if (codeBoxContents != "") {
+	var codeBoxContents = "";
+	if (questionableWarning == "") {
+		var codeBoxContents = informCode;
+	} else {
+		var codeBoxContents = questionableWarning + informCode;
+	}
+	if (codeBoxContents != "") {
         document.getElementById("generated-code").value = codeBoxContents;
     } else {
-        document.getElementById("generated-code").value = 
-        "[No actions are selected, so there is no code to generate.]";
+		document.getElementById("generated-code").value = 
+		"[None of the actions have checkmarks, so there is no code to generate.]";
     }
 }
  
 // The main routine: Decide which kind of code to generate and invoke other
 // functions as needed.
 function generateCode() {
-    var chosenQuestionableActions = [],
-        questionableWarning = "",
-        informCode = "";
-    var chosenQuestionableActions = findChosenQuestionableActions();
-    var questionableWarning =
-    createQuestionableWarning(chosenQuestionableActions);
+	var chosenQuestionableActions = [],
+		questionableWarning = "",
+		informCode = "";
+	var chosenQuestionableActions = findChosenQuestionableActions();
+	var questionableWarning =
+	createQuestionableWarning(chosenQuestionableActions);
     if (document.getElementById("understand-radio-button").checked == true) {
         var informCode = generateUnderstandCode();
-    } else {
+	} else {
         var informCode = generateKindCode();
         }
-    displayCode(questionableWarning, informCode);
+	displayCode(questionableWarning, informCode);
 }
 
 
@@ -193,23 +194,33 @@ function selectText(idName) {
 <link rel="stylesheet" href="style.css">
 </head>
 <body onload="setUpAccordionButtons()">
-<div id="top-of-page" class="header-text"><br>Last updated: May 2016</div>
 <h1>Parser Parer</h1>
 <h2>Generate Inform 7 code to limit the player's actions.</h2>
-<p><i>For background, see <a href="https://heterogenoustasks.wordpress.com/2016/05/18/narrow-parsers/">this post by Sam Kabo Ashwell</a>.</i></p>
-<noscript>
 <hr>
+<div class="header-text">
+Parer last updated: May 2016.&#160;&#160;&#160;<b>~</b>&#160;&#160;&#160;For background, see Sam Kabo Ashwell's post on <a href="https://heterogenoustasks.wordpress.com/2016/05/18/narrow-parsers/">Narrow Parsers</a>.
+</div>
+<hr> 
+<noscript>
 <br>
 <p class="warning" id="javascript-note">NOTE: You'll need to turn on JavaScript in your web browser in order for the code generator to work.</p>
 <br>
-<hr></noscript>
-<div class="important-box" id="choose-code-type">
+<hr>
+</noscript>
+<h3>How to generate the code:</h3>
+<div class="instructions">
+<ol>
+<li>In the <b>My code should...</b> box, select what kind of code you'd like.</li>
+<li>Check the checkboxes of the actions you'd like code for.</li>
+<li>At the bottom of the form, click the <b>Generate Code</b> button.</li>
+<li>Click the <b>Select Code</b> button to highlight the code for copying.</li>
+</ol>
+(You can also click an action name or its <b>+</b> symbol to see the associated commands. This is only for reference. It does not affect the code.)</div>
+<div class="important-box" id="top-of-form"">
 <h3>My code should...</h3>
 <p><input type="radio" name="code-type" id="understand-radio-button" checked="checked"> not recognize the chosen actions. ("Understand nothing as" the action.)</p>
 <p><input type="radio" name="code-type" id="kind-radio-button"> assign a kind to the chosen actions. (The action "is <input type=text id="kindText" value="frivolous behavior" maxlength="40">.")</p>
 </div>
-<p><i>To choose actions, check the checkboxes. To see which commands go with a given action, select the name of the action.</i>
-<p>
 <button type="button" class="medium-button" name="select-everything" onClick="selectAll('action')">Check all actions</button>
 <button type="button" class="medium-button" name="unselect-everything" onClick="unselectAll('action')">Uncheck all actions</button>
 </p>
@@ -758,7 +769,7 @@ function selectText(idName) {
 <ul>
 <li>"version"</li>
 </ul>
-</div>    
+</div>	
 <input type="checkbox" class="action meta" id="Requesting-the-score"><button class="accordion">Requesting the score</button>
 <div class="panel">
 <ul>
@@ -812,12 +823,12 @@ function selectText(idName) {
 <hr>
 <span style="color: #f42a07; font-weight: bold;">*Disabling these actions may upset players. Disabling "requesting the story file version" may also violate Inform's license requirements.</span>
 </fieldset>
-<p><a href="#top-of-page" id="end-of-form">Jump to the top of the page.</a></p>
+<p><a href="#top-of-form" id="end-of-form">Jump to the top of the form.</a></p>
 <p><button type="button" class="large-button" name="generate" onClick="generateCode()">Generate Code</button><button type="button" class="large-button" name="selectCode" onClick="selectText('generated-code')">Select Code</button></p>
 <p>Each time you <b>generate code</b>, any existing code below will be replaced with new code. <b>Select code</b> will highlight it. Then you can copy it with <i>Ctrl C</i>.</p>
 <p><textarea class="code-box" id="generated-code" readonly="readonly" ></textarea></p>
 <hr>
-<div class="footer-text"><p><i>The actions in the form above, their category names, and their commands are quoted directly from version 6L38 of the <a href="http://inform7.com/">Inform 7 IDE</a>. Inform was written by Graham Nelson, "with help from Emily Short and many others."</i></p></div>
+<div class="footer-text"><p><i>The actions in the form above, their category names, and their commands are quoted from version 6L38 of the <a href="http://inform7.com/">Inform 7 IDE</a>. Inform was "written by Graham Nelson with help from Emily Short and many others."</i></p></div>
 <br><br>
 <script>
 // Assign onclick events to all the accordion buttons.
@@ -829,7 +840,7 @@ function setUpAccordionButtons() {
             this.classList.toggle("active");
             this.nextElementSibling.classList.toggle("show");
             }
-    }
+	}
 }
 </script>
 </body>
